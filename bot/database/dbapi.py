@@ -101,25 +101,29 @@ class DatabaseConnector:
                 .filter(Book.book_id == book_id)
                 .first())
         # Look up for user borrows
-        borrow = (session
+        user_borrow = (session
             .query(Borrow)
             .filter(and_(Borrow.user_id == self.user_id, Borrow.date_end == None))
             .first())
-        is_borrowed = False
+        book_borrow = (session
+            .query(Borrow)
+            .filter(and_(Borrow.book_id == book_id, Borrow.date_end == None))
+            .first())
+        created_borrow = False
         book_id = None
         print(book)
-        print(borrow)
-        if book: # If book was found
-            if len(book.borrow) == 0 and not borrow: # If book is not borrowed and user dose not borrow
+        print(book_borrow)
+        print(user_borrow)
+        if book and not user_borrow and not book_borrow:
                 book.borrow.append(Borrow(
                     book_id=book.book_id,
                     user_id=self.user_id
                 ))
                 session.commit()
                 book_id = book.book_id
-                is_borrowed = True
+                created_borrow = True
         session.close()
-        if is_borrowed:
+        if created_borrow:
             return book_id
         else:
             return False
