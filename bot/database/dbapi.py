@@ -8,12 +8,27 @@ from .models import *
 class DatabaseConnector:
 
     def __init__(self):
-        self.engine = create_engine('sqlite:///books.db')
-        self.Session = sessionmaker(bind=self.engine)
+        USER = 'Arzym'
+        PASSWORD = '201200374art'
+        PORT = '5432'
+        DBNAME = 'books'
 
-    def add(self, name: str, author: str, pub_year: int) -> tuple[bool, int]:
+        self.engine = create_engine(f'postgresql://{USER}:{PASSWORD}@localhost:{PORT}/{DBNAME}')
+        self.Session = sessionmaker(bind=engine)
+
+    def add(self, title: str, author: str, published: int) -> tuple[bool, int]:
         session = self.Session()
-        session.close() 
+        try:
+            book = Book(title=title, author=author, published=published)
+            session.add(book)
+            session.commit()
+        except:
+            session.rollback() 
+            return False
+        else:
+            return book.boock_id
+        finally:
+            session.close()
 
     def delete(self, book_id: int) -> bool:
         session = self.Session()
@@ -23,7 +38,7 @@ class DatabaseConnector:
         session = self.Session()
         session.close()
 
-    def get_book(self, name: str, author: str, pub_year: int) -> tuple[bool, int]:
+    def get_book(self, title: str, author: str, published: int) -> tuple[bool, int]:
         session = self.Session()
         session.close()
 
@@ -31,7 +46,7 @@ class DatabaseConnector:
         session = self.Session()
         session.close()
 
-    def get_borrow(self, name: str, author: str, pub_year: int) -> int:
+    def get_borrow(self, title: str, author: str, published: int) -> int:
         session = self.Session()
         session.close()
 
