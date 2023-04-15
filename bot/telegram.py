@@ -90,7 +90,12 @@ def book_published(message):
             bot.send_message(chat_id, "Такой книги у нас нет")
 
     elif book.command == '/stats':
-        pass #АаААААааААааа
+        book_id = db_connector.get_book(book.title, book.author, book.published)
+        if book_id:
+            app.download_book_stats(book_id)
+            bot.send_message(chat_id, f"Статистика доступна по адресу http://localhost/download/{book_id}")
+        else:
+            bot.send_message(chat_id, "Нет такой книги")
 
 def delete_book(message):
     chat_id = message.chat.id
