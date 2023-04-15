@@ -127,10 +127,10 @@ def show_list(message):
     books_list = db_connector.list_books()
     ans = ""
     for book in books_list:
-        line = ""
+        line = f"{book.title} {book.author} {book.published}, {book.date_added} \n"
         ans.append(line)
     bot.send_message(chat_id, ans)
-    #дописать логику после того, как узнаю принцип работы АПИ
+
 
 @bot.message_handler(commands=['retrieve'])
 def retrieve_book(message):
