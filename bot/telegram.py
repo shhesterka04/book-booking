@@ -66,7 +66,7 @@ def book_published(message):
         else:
             bot.send_message(chat_id, "Ошибка создания записи")
     elif book.command == '/delete':
-        book_id = db_connector.get_book(book.title, book.author, book.published)
+        book_id = db_connector.get_book(book.title, book.author)
         if book_id:
             msg = bot.send_message(chat_id, f"Найдена книга: {book.title} {book.author} {book.published}. Удаляем?")
             bot.register_next_step_handler(msg, delete_book)
@@ -74,7 +74,7 @@ def book_published(message):
             bot.send_message("Невозможно удалить книгу")
 
     elif book.command == '/borrow':
-        book_id = db_connector.get_book(book.title, book.author, book.published)
+        book_id = db_connector.get_book(book.title, book.author)
         if book_id:
             msg = bot.send_message(chat_id, f"Найдена книга: {book.title} {book.author} {book.published}. Берем?")
             bot.register_next_step_handler(msg, borrow_book)
@@ -83,14 +83,14 @@ def book_published(message):
 
 
     elif book.command == '/find':
-        book_id = db_connector.get_book(book.title, book.author, book.published)
+        book_id = db_connector.get_book(book.title, book.author)
         if book_id:
             bot.send_message(chat_id, f"Найдена книга: {book.title} {book.author} {book.published}")
         else:
             bot.send_message(chat_id, "Такой книги у нас нет")
 
     elif book.command == '/stats':
-        book_id = db_connector.get_book(book.title, book.author, book.published)
+        book_id = db_connector.get_book(book.title, book.author)
         if book_id:
             app.download_book_stats(book_id)
             bot.send_message(chat_id, f"Статистика доступна по адресу http://localhost/download/{book_id}")
@@ -101,7 +101,7 @@ def delete_book(message):
     chat_id = message.chat.id
     book = temp_books[chat_id]
     if message.text == "Да":
-        status = db_connector.delete(book.title, book.author, book.published)
+        status = db_connector.delete(db_connector.get_book(book.title, book.author))
         if status:
             bot.send_message(chat_id, "Книга удалена")
         else:
@@ -113,7 +113,7 @@ def borrow_book(message):
     chat_id = message.chat.id
     book = temp_books[chat_id]
     if message.text == "Да":
-        status = db_connector.borrow(book.title, book.author, book.published)
+        status = db_connector.borrow(db_connector.get_book(book.title, book.author))
         if status:
             bot.send_message(chat_id, "Вы взяли книгу")
         else:
