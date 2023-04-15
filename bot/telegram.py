@@ -2,7 +2,7 @@ import telebot
 import database as db
 
 token = "5958465756:AAE8FNZ2_sNZ5tJHKhs-QnV6afQHA6kBptM" 
-db_connector = DatabaseConnector()
+db_connector = db.DatabaseConnector()
 bot = telebot.TeleBot(token)
 temp_books = {}
 
