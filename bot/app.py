@@ -9,7 +9,6 @@ db = database.DatabaseConnector()
 @app.route('/download/<int:book_id>')
 def download_book_stats(book_id):
     #usage_data = db.get_book_usage(book_id)
-
     with tempfile.NamedTemporaryFile(mode="w+b", suffix=".xlsx", delete=False) as temp_file:
         df = pd.DataFrame(usage_data)
         if 'user_id' in df.columns:
