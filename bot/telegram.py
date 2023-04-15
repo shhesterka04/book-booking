@@ -7,10 +7,10 @@ bot = telebot.TeleBot(token)
 temp_books = {}
 
 class Book():
-    def __init__(self, title:str=None, author:str=None, year:int=None, command=None):
+    def __init__(self, title:str=None, author:str=None, published:int=None, command=None):
         self.title = title
         self.author = author
-        self.year = year
+        self.published = published
         self.command = command
 
 @bot.message_handler(commands=['start'])
@@ -45,46 +45,46 @@ def book_author(message):
     author = message.text
     temp_books[chat_id].author = author
     msg = bot.send_message(chat_id, "Введите год издания:")
-    bot.register_next_step_handler(msg, book_year)
+    bot.register_next_step_handler(msg, book_published)
 
-def book_year(message):
+def book_published(message):
     chat_id = message.chat.id
     try:
-        year = int(message.text)
+        published = int(message.text)
     except ValueError:
         bot.send_message(chat_id, "Невалидный год публикации. Введите целое число")
         return
-    temp_books[chat_id].year = year
+    temp_books[chat_id].published = published
     book = temp_books[chat_id]
 
     if book.command == '/add':
-        bot.message_handler(f"Книга {book.title}, {book.author} {book.year} года добавлена!") #debug
-        book_id = db_connector.add(book.title, book.author, book.year)
+        bot.message_handler(f"Книга {book.title}, {book.author} {book.published} года добавлена!") #debug
+        book_id = db_connector.add(book.title, book.author, book.published)
         if book_id:
             bot.send_message(chat_id, f"Книга добавлена (id: {book_id})")
         else:
             bot.send_message(chat_id, "Ошибка создания записи")
     elif book.command == '/delete':
-        book_id = db_connector.get_book(book.title, book.author, book.year)
+        book_id = db_connector.get_book(book.title, book.author, book.published)
         if book_id:
-            msg = bot.send_message(chat_id, f"Найдена книга: {book.title} {book.author} {book.year}. Удаляем?")
+            msg = bot.send_message(chat_id, f"Найдена книга: {book.title} {book.author} {book.published}. Удаляем?")
             bot.register_next_step_handler(msg, delete_book)
         else:
             bot.send_message("Невозможно удалить книгу")
 
     elif book.command == '/borrow':
-        book_id = db_connector.get_book(book.title, book.author, book.year)
+        book_id = db_connector.get_book(book.title, book.author, book.published)
         if book_id:
-            msg = bot.send_message(chat_id, f"Найдена книга: {book.title} {book.author} {book.year}. Берем?")
+            msg = bot.send_message(chat_id, f"Найдена книга: {book.title} {book.author} {book.published}. Берем?")
             bot.register_next_step_handler(msg, borrow_book)
         else:
             bot.send_message("Книгу сейчас невозможно взять")
 
 
     elif book.command == '/find':
-        book_id = db_connector.get_book(book.title, book.author, book.year)
+        book_id = db_connector.get_book(book.title, book.author, book.published)
         if book_id:
-            bot.send_message(chat_id, f"Найдена книга: {book.title} {book.author} {book.year}")
+            bot.send_message(chat_id, f"Найдена книга: {book.title} {book.author} {book.published}")
         else:
             bot.send_message(chat_id, "Такой книги у нас нет")
 
@@ -95,7 +95,7 @@ def delete_book(message):
     chat_id = message.chat.id
     book = temp_books[chat_id]
     if message.text == "Да":
-        status = db_connector.delete(book.title, book.author, book.year)
+        status = db_connector.delete(book.title, book.author, book.published)
         if status:
             bot.send_message(chat_id, "Книга удалена")
         else:
@@ -107,7 +107,7 @@ def borrow_book(message):
     chat_id = message.chat.id
     book = temp_books[chat_id]
     if message.text == "Да":
-        status = db_connector.borrow(book.title, book.author, book.year)
+        status = db_connector.borrow(book.title, book.author, book.published)
         if status:
             bot.send_message(chat_id, "Вы взяли книгу")
         else:
@@ -132,7 +132,7 @@ def retrieve_book(message):
     book_id = db_connector.get_borrow()
     book = temp_books[book_id]
     #согласовать моментик
-    bot.send_message(f"Вы вернули книгу {book.title} {book.author} {book.year}")
+    bot.send_message(f"Вы вернули книгу {book.title} {book.author} {book.published}")
 
 
 
