@@ -28,6 +28,15 @@ class Borrow(Base):
 
     book: Mapped['Book'] = relationship('Book', back_populates='borrow')
 
+    def as_dict(self):
+        return {
+            'borrow_id': self.borrow_id, 
+            'book_id': self.book_id, 
+            'date_start': self.date_start, 
+            'date_end': self.date_end, 
+            'user_id': self.user_id
+            }
+
 
 from sqlalchemy import create_engine
 

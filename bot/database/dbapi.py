@@ -1,4 +1,5 @@
 from typing import Tuple, List
+import pandas as pd 
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -67,6 +68,16 @@ class DatabaseConnector:
         books = list(session.query(Book).all())
         session.close()
         return books
+    
+
+    def get_book_usage(self, book_id: int):
+        session = self.Session()
+        book = session.query(Book).filter(Book.book_id == 4).first()
+        borrows = [item.__dict__ for item in book.borrow]
+        df = pd.DataFrame.from_records(borrows)
+        df = df.drop(['_sa_instance_state', 'book_id', 'user_id'], axis=1)
+        session.close()
+        return df
 
 
     '''

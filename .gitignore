@@ -109,6 +109,7 @@ env/
 s21/
 venv/
 ENV/
+s21/
 env.bak/
 venv.bak/
 
