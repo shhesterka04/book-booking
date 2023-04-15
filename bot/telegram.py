@@ -2,8 +2,7 @@ import telebot
 import database as db
 
 token = "5958465756:AAE8FNZ2_sNZ5tJHKhs-QnV6afQHA6kBptM" 
-#db_connector = DatabaseConnector()
-#интересно а в VS можно делать переменные среды?
+db_connector = DatabaseConnector()
 bot = telebot.TeleBot(token)
 temp_books = {}
 
@@ -60,31 +59,83 @@ def book_year(message):
 
     if book.command == '/add':
         bot.message_handler(f"Книга {book.title}, {book.author} {book.year} года добавлена!") #debug
-        # book_id = db_connector.add(book.title, book.author, book.year)
-        # if book_id:
-        #     bot.send_message(chat_id, f"Книга добавлена (id: {book_id})")
-        # else:
-        #     bot.send_message(chat_id, "Ошибка создания записи")
+        book_id = db_connector.add(book.title, book.author, book.year)
+        if book_id:
+            bot.send_message(chat_id, f"Книга добавлена (id: {book_id})")
+        else:
+            bot.send_message(chat_id, "Ошибка создания записи")
     elif book.command == '/delete':
-        pass
+        book_id = db_connector.get_book(book.title, book.author, book.year)
+        if book_id:
+            msg = bot.send_message(chat_id, f"Найдена книга: {book.title} {book.author} {book.year}. Удаляем?")
+            bot.register_next_step_handler(msg, delete_book)
+        else:
+            bot.send_message("Невозможно удалить книгу")
 
     elif book.command == '/borrow':
-        pass
+        book_id = db_connector.get_book(book.title, book.author, book.year)
+        if book_id:
+            msg = bot.send_message(chat_id, f"Найдена книга: {book.title} {book.author} {book.year}. Берем?")
+            bot.register_next_step_handler(msg, borrow_book)
+        else:
+            bot.send_message("Книгу сейчас невозможно взять")
+
 
     elif book.command == '/find':
-        pass
+        book_id = db_connector.get_book(book.title, book.author, book.year)
+        if book_id:
+            bot.send_message(chat_id, f"Найдена книга: {book.title} {book.author} {book.year}")
+        else:
+            bot.send_message(chat_id, "Такой книги у нас нет")
 
     elif book.command == '/stats':
-        pass
+        pass #АаААААааААааа
+
+def delete_book(message):
+    chat_id = message.chat.id
+    book = temp_books[chat_id]
+    if message.text == "Да":
+        status = db_connector.delete(book.title, book.author, book.year)
+        if status:
+            bot.send_message(chat_id, "Книга удалена")
+        else:
+            bot.send_message(chat_id, "Невозможно удалить книгу")
+    elif message.text == "Нет":
+        bot.send_message(chat_id, "Удаление книги отменено")
+
+def borrow_book(message):
+    chat_id = message.chat.id
+    book = temp_books[chat_id]
+    if message.text == "Да":
+        status = db_connector.borrow(book.title, book.author, book.year)
+        if status:
+            bot.send_message(chat_id, "Вы взяли книгу")
+        else:
+            bot.send_message(chat_id, "Книгу сейчас невозможно взять")
+    elif message.text == "Нет":
+        bot.send_message(chat_id, "Аренда книги отменена")
 
 @bot.message_handler(commands=['list'])
 def show_list(message):
-    pass
-
+    chat_id = message.chat.id
+    books_list = db_connector.list_books()
+    ans = ""
+    for book in books_list:
+        line = ""
+        ans.append(line)
+    bot.send_message(chat_id, ans)
+    #дописать логику после того, как узнаю принцип работы АПИ
 
 @bot.message_handler(commands=['retrieve'])
 def retrieve_book(message):
-    pass
+    chat_id = message.chat.id
+    book_id = db_connector.get_borrow()
+    book = temp_books[book_id]
+    #согласовать моментик
+    bot.send_message(f"Вы вернули книгу {book.title} {book.author} {book.year}")
+
+
+
 
 
 bot.infinity_polling()
