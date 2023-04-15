@@ -8,7 +8,7 @@ Base = declarative_base()
 class Book(Base):
     __tablename__ = 'books'
 
-    boock_id: Mapped[int] = Column(Integer, primary_key=True)
+    book_id: Mapped[int] = Column(Integer, primary_key=True)
     title: Mapped[str] = Column(String)
     author: Mapped[str] = Column(String)
     published: Mapped[int] = Column(Integer)
@@ -21,10 +21,10 @@ class Borrow(Base):
     __tablename__ = 'borrows'
 
     borrow_id: Mapped[int] = Column(Integer, primary_key=True)
-    book_id: Mapped[int] = Column(Integer, ForeignKey('books.boock_id'))
+    book_id: Mapped[int] = Column(Integer, ForeignKey('books.book_id'))
     date_start: Mapped[date] = Column(Date, server_default=func.now())
     date_end: Mapped[date] = Column(Date)
-    user_id: Mapped[date] = Column(Date)
+    user_id: Mapped[int] = Column(Integer)
 
     book: Mapped['Book'] = relationship('Book', back_populates='borrow')
 
