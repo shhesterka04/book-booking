@@ -2,16 +2,17 @@ import telebot
 import database as db
 
 token = "5958465756:AAE8FNZ2_sNZ5tJHKhs-QnV6afQHA6kBptM" 
-db_connector = DatabaseConnector()
+#db_connector = DatabaseConnector()
 #интересно а в VS можно делать переменные среды?
 bot = telebot.TeleBot(token)
 temp_books = {}
 
 class Book():
-    def __init__(self, title:str=None, author:str=None, year:int=None):
+    def __init__(self, title:str=None, author:str=None, year:int=None, command=None):
         self.title = title
         self.author = author
         self.year = year
+        self.command = command
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
@@ -25,11 +26,12 @@ def send_welcome(message):
 \
 """)
 
-@bot.message_handler(commands=['add'])
+@bot.message_handler(commands=['add', 'delete', 'find', 'borrow', 'stats'])
 def add_book(message):
     chat_id = message.chat.id
+    cmd = message.text
+    temp_books[chat_id] = Book(command=cmd)
     msg = bot.send_message(chat_id, "Введите название книги:")
-    temp_books[chat_id] = Book()
     bot.register_next_step_handler(msg, book_title)
 
 def book_title(message):
@@ -50,52 +52,44 @@ def book_year(message):
     chat_id = message.chat.id
     try:
         year = int(message.text)
-    except:
+    except ValueError:
         bot.send_message(chat_id, "Невалидный год публикации. Введите целое число")
         return
-        #мб цикл сюда?
     temp_books[chat_id].year = year
-    current_book = temp_books[chat_id]
-    book_id = db_connector.add(current_book.title, current_book.author, current_book.year)
-    if book_id:
-        bot.send_message(chat_id, f"Книга добавлена (id: {book_id})")
-    else:
-        bot.send_message(chat_id, "Ошибка создания записи")
+    book = temp_books[chat_id]
 
+    if book.command == '/add':
+        bot.message_handler(f"Книга {book.title}, {book.author} {book.year} года добавлена!") #debug
+        # book_id = db_connector.add(book.title, book.author, book.year)
+        # if book_id:
+        #     bot.send_message(chat_id, f"Книга добавлена (id: {book_id})")
+        # else:
+        #     bot.send_message(chat_id, "Ошибка создания записи")
+    elif book.command == '/delete':
+        pass
 
-@bot.message_handler(commands=['delete'])
-def delete_book(message):
-    pass
+    elif book.command == '/borrow':
+        pass
+
+    elif book.command == '/find':
+        pass
+
+    elif book.command == '/stats':
+        pass
 
 @bot.message_handler(commands=['list'])
 def show_list(message):
     pass
 
-@bot.message_handler(commands=['find'])
-def find_book(message):
-    pass
-
-@bot.message_handler(commands=['borrow'])
-def borrow_book(message):
-    pass
 
 @bot.message_handler(commands=['retrieve'])
 def retrieve_book(message):
     pass
 
-@bot.message_handler(commands=['stats'])
-def get_stats(message):
-    pass
-
-
 
 bot.infinity_polling()
 
 
-class Book:
-    def __init__(self, title, author, year):
-        self.title = title
-        self.author = author
-        self.year = year
+
 
 
