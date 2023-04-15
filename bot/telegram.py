@@ -1,5 +1,6 @@
 import telebot
 import database as db
+import app
 
 token = "5958465756:AAE8FNZ2_sNZ5tJHKhs-QnV6afQHA6kBptM" 
 db_connector = db.DatabaseConnector()
@@ -128,10 +129,9 @@ def show_list(message):
 
 @bot.message_handler(commands=['retrieve'])
 def retrieve_book(message):
-    chat_id = message.chat.id
     book_id = db_connector.get_borrow()
     book = temp_books[book_id]
-    #согласовать моментик
+    db_connector.retrieve()
     bot.send_message(f"Вы вернули книгу {book.title} {book.author} {book.published}")
 
 
